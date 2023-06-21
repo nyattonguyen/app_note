@@ -36,3 +36,18 @@ export const addNewFolder = async (newFolder) => {
 
   return data;
 };
+
+export const removeFolder = async ({ params: { id } }) => {
+  const query = `mutation RemoveFolder($removeFolderId: String!) {
+    removeFolder(id: $removeFolderId) {
+      id
+    }
+  }`;
+
+  const data = await graphQLRequest({
+    query,
+    variables: { removeFolderId: id },
+  });
+
+  return data;
+};

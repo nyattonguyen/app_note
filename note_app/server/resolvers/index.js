@@ -1,5 +1,13 @@
 import { GraphQLScalarType } from "graphql";
-import { FolderModel, NoteModel, AuthorModel } from "../models/index.js";
+import {
+  FolderModel,
+  NoteModel,
+  AuthorModel,
+  NotificationModel,
+} from "../models/index.js";
+import { PubSub } from "graphql-subscriptions";
+
+const pubsub = new PubSub();
 
 export const resolvers = {
   Date: new GraphQLScalarType({
@@ -63,9 +71,33 @@ export const resolvers = {
     },
     addFolder: async (parent, args, context) => {
       const newFolder = new FolderModel({ ...args, authorId: context.uid });
-      console.log(newFolder);
+      pubsub.publish("FOLDER_CREATED", {
+        folderCreated: {
+          message: "A new folder created",
+        },
+      });
       await newFolder.save();
       return newFolder;
+    },
+    removeFolder: async (parent, args, context) => {
+      const idFolder = await FolderModel.findByIdAndDelete(args.id);
+      await NoteModel.deleteMany({ folderId: args.id });
+      pubsub.publish("FOLDER_REMOVE", {
+        folderDeleted: {
+          message: "Removed folder",
+        },
+      });
+      return idFolder;
+    },
+    removeNote: async (parent, args, context) => {
+      console.log(args);
+      const idNote = await NoteModel.findByIdAndDelete(args.id);
+      pubsub.publish("NOTE_REMOVE", {
+        noteDeleted: {
+          message: "Removed note",
+        },
+      });
+      return idNote;
     },
     register: async (parent, args) => {
       const foundUser = await AuthorModel.findOne({ uid: args.uid });
@@ -76,6 +108,24 @@ export const resolvers = {
         return newUser;
       }
       return foundUser;
+    },
+    pushNotification: async (parent, args) => {
+      const newNotification = new NotificationModel(args);
+      pubsub.publish("PUSH_NOTIFICATION", {
+        notification: {
+          message: args.content,
+        },
+      });
+      await newNotification.save();
+      return { message: "SUCCESS" };
+    },
+  },
+  Subscription: {
+    folderCreated: {
+      subscribe: () => pubsub.asyncIterator(["FOLDER_CREATED", "NOTE_CREATED"]),
+    },
+    notification: {
+      subscribe: () => pubsub.asyncIterator(["PUSH_NOTIFICATION"]),
     },
   },
 };

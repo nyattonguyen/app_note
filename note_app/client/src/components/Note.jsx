@@ -34,7 +34,7 @@ const Note = () => {
 
   useEffect(() => {
     debouncedMemorized(rawHTML, note, location.pathname);
-  }, [rawHTML, location.pathname]);
+  }, [rawHTML, note.id, location.pathname]);
 
   const debouncedMemorized = useMemo(() => {
     return debounce((rawHTML, note, pathname) => {
@@ -48,11 +48,12 @@ const Note = () => {
           action: pathname,
         }
       );
-    }, 1500);
+    }, 1000);
   }, []);
 
   const handleOnChage = (e) => {
     setEditorState(e);
+    console.log(editorState);
     setRawHTML(draftToHtml(convertToRaw(e.getCurrentContent())));
   };
   return (
@@ -60,6 +61,12 @@ const Note = () => {
       editorState={editorState}
       onEditorStateChange={handleOnChage}
       placeholder="Write here"
+      editorStyle={{
+        background: "white",
+        height: "auto",
+        minHeight: "100px",
+        marginTop: "6px",
+      }}
     />
   );
 };

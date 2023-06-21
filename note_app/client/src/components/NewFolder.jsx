@@ -13,7 +13,7 @@ import { CreateNewFolderOutlined } from "@mui/icons-material";
 import { addNewFolder } from "../util/folderUtils";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
-export default function NewFolder() {
+export default function NewFolder({ onFolderAdded }) {
   const [newFolderName, setNewFolderName] = useState("");
   const [open, setOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -36,6 +36,9 @@ export default function NewFolder() {
     console.log({ addFolder });
 
     handleClose();
+    if (onFolderAdded) {
+      onFolderAdded(addFolder); // Gọi hàm callback để thông báo thêm thư mục mới
+    }
   };
 
   useEffect(() => {

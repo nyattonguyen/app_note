@@ -5,12 +5,15 @@ import {
   Grid,
   IconButton,
   List,
+  Menu,
+  MenuItem,
   Tooltip,
   Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import {
   Link,
+  Navigate,
   Outlet,
   useLoaderData,
   useNavigate,
@@ -19,13 +22,20 @@ import {
 } from "react-router-dom";
 import moment from "moment";
 import { NoteAddOutlined } from "@mui/icons-material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { removeNote } from "../util/noteUtils";
+
 const NoteList = () => {
   const { noteId, folderId } = useParams();
   const [activeNoteId, setActiveNoteId] = useState(noteId);
   const { folder } = useLoaderData();
   const navigate = useNavigate();
   const submit = useSubmit();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [noteList, setNoteList] = useState(folder.notes);
 
+  const open = Boolean(anchorEl);
+  ///\\\////
   useEffect(() => {
     if (noteId) {
       setActiveNoteId(noteId);
@@ -36,7 +46,20 @@ const NoteList = () => {
       navigate(`note/${folder.notes[0].id}`);
     }
   }, [noteId, folder.notes]);
-
+  ///\\\////
+  useEffect(() => {
+    setNoteList([...folder.notes]);
+  }, [folder.notes]);
+  ///\\\////
+  const handleDeleteNote = async () => {
+    await removeNote({ params: { id: activeNoteId } });
+    handleClose();
+    const updatedNoteList = folder.notes.filter(
+      (note) => note.id !== activeNoteId
+    );
+    setNoteList(updatedNoteList);
+    Navigate("/");
+  };
   const handleAddNewNote = () => {
     submit(
       {
@@ -47,6 +70,12 @@ const NoteList = () => {
     );
   };
 
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const handleClick = (e) => {
+    setAnchorEl(e.currentTarget);
+  };
   return (
     <Grid container height="100%">
       <Grid
@@ -85,6 +114,9 @@ const NoteList = () => {
                 <Card
                   sx={{
                     mb: "5px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
                     backgroundColor:
                       id === activeNoteId ? "rgb(255 211 140)" : null,
                   }}
@@ -100,6 +132,21 @@ const NoteList = () => {
                       {moment(updatedAt).format("MMMM Do YYYY, h:mm:ss a")}
                     </Typography>
                   </CardContent>
+                  <Menu
+                    id="basic-menu"
+                    anchorEl={anchorEl}
+                    open={open}
+                    onClose={handleClose}
+                  >
+                    <MenuItem onClick={handleDeleteNote}>Delete</MenuItem>
+                  </Menu>
+                  <IconButton
+                    sx={{ zIndex: 1 }}
+                    size="small"
+                    onClick={handleClick}
+                  >
+                    <MoreVertIcon />
+                  </IconButton>
                 </Card>
               </Link>
             );
