@@ -10,7 +10,7 @@ const firebaseConfig = {
   projectId: "note-app-3c377",
   storageBucket: "note-app-3c377.appspot.com",
   messagingSenderId: "468700525562",
-  appId: "1:468700525562:web:d0101a207117ffc74daa43",
+  appId: process.env.appId,
   measurementId: "G-3XDWMVNJLK",
 };
 
