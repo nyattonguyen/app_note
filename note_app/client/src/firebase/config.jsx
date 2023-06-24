@@ -12,9 +12,10 @@ const firebaseConfig = {
   projectId: "note-app-3c377",
   storageBucket: "note-app-3c377.appspot.com",
   messagingSenderId: "468700525562",
-  appId: process.env.appId,
+  appId: "1:468700525562:web:d0101a207117ffc74daa43",
   measurementId: "G-3XDWMVNJLK",
 };
+console.log(firebaseConfig.appId);
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
